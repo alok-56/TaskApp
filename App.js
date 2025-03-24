@@ -1,20 +1,43 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import React, { useContext, useEffect, useState } from "react";
+import { NavigationContainer } from "@react-navigation/native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import AppStack from "./Src/Navigation/AppStack";
+import AuthStack from "./Src/Navigation/AuthStack";
+import { authcontext, AuthContextProvider } from "./Src/Context/AuthContext";
 
-export default function App() {
+const EntryScreen = () => {
+  let { islogin, setislogin } = useContext(authcontext);
+
+  const CheckUserToken = async () => {
+    let login = await AsyncStorage.getItem("token");
+    if (login !== null) {
+      setislogin(true);
+    } else {
+      setislogin(false);
+    }
+  };
+
+  useEffect(() => {
+    CheckUserToken();
+  }, []);
+
   return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
+    <>
+      <NavigationContainer>
+        {islogin ? <AppStack></AppStack> : <AuthStack></AuthStack>}
+      </NavigationContainer>
+    </>
   );
-}
+};
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+const App = () => {
+  return (
+    <>
+      <AuthContextProvider>
+        <EntryScreen></EntryScreen>
+      </AuthContextProvider>
+    </>
+  );
+};
+
+export default App;
